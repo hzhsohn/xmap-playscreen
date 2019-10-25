@@ -10,10 +10,13 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.hxk.playscreen.R;
+import com.hxk.playscreen.ebus.EBusContent;
+import com.hxk.playscreen.ebus.EBusType;
 import com.hxk.playscreen.mqtt.MqttManager;
 import com.lichfaker.log.Logger;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Timer;
@@ -26,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private String userName = "";
     private String password = "";
     private String clientId = "clientId";
+    private boolean isFristConnected=false;
+    Timer timer = new Timer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,23 +41,10 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-
-        //连接MQTT
+        //注册EventBus
+        EventBus.getDefault().register(this);
+        //主动连接MQTT
         timer.schedule(timerTask,1000,5000);//延时1s，每隔5000毫秒执行一次run方法
-
-        //--------------------------------------------
-        findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean b = MqttManager.getInstance().creatConnect(URL, userName, password, clientId);
-                        Logger.d("isConnected: " + b);
-                    }
-                }).start();
-            }
-        });
 
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        MqttManager.getInstance().subscribe("test", 2);
+                        MqttManager.getInstance().subscribe("test1", 2);
                     }
                 }).start();
             }
@@ -94,15 +86,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
 
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == 1){
+
                 boolean isConnected=MqttManager.getInstance().isConnected();
+
                 Log.d("mqtt","当前连接状态:"+isConnected);
                 if(!isConnected) {
                     //连接MQTT
@@ -112,7 +104,18 @@ public class MainActivity extends AppCompatActivity {
                             boolean b = MqttManager.getInstance().creatConnect(URL, userName, password, clientId);
                             if(b) {
                                 Log.d("mqtt", "连接成功!");
+                                isFristConnected=true;
                             }
+                        }
+                    }).start();
+                }
+                if(isFristConnected) {
+                    isFristConnected=false;
+                    //订阅标题
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MqttManager.getInstance().subscribe("test", 2);
                         }
                     }).start();
                 }
@@ -121,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    Timer timer = new Timer();
     TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
@@ -138,9 +140,17 @@ public class MainActivity extends AppCompatActivity {
      * @param message
      */
     @Subscribe
-    public void onEvent(MqttMessage message) {
-        //输出test订阅信息的内容
-        Logger.d(message.toString());
+    public void onEvent(EBusContent ebc) {
+        if (ebc.ebusType == EBusType.ebusMQTTContent)
+        {
+            //输出test订阅信息的内容
+            MqttMessage message = (MqttMessage) ebc.content;
+            Logger.d(message.toString());
+        }
+        else if (ebc.ebusType == EBusType.ebusMQTTDisconnect)
+        {}
+        else if (ebc.ebusType == EBusType.ebusMQTTPubDone)
+        {}
     }
 
     @Override
