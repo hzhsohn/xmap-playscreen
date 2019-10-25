@@ -1,6 +1,6 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-3    package="com.hxk.playscreen"
+3    package="android.hxk.playscreen"
 4    android:versionCode="1"
 5    android:versionName="1.0" >
 6
@@ -33,7 +33,7 @@
 22-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:12:9-59
 23        <activity
 23-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:9-20:20
-24            android:name="com.hxk.playscreen.ui.MainActivity"
+24            android:name="android.hxk.playscreen.ui.MainActivity"
 24-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:19-50
 25            android:screenOrientation="landscape" >
 25-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:51-88

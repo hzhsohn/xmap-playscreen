@@ -35,7 +35,7 @@ INJECTED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest
 INJECTED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:1:1-24:12
 INJECTED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:1:1-24:12
 	package
-		ADDED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:2:5-33
+		ADDED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:2:5-37
 		INJECTED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml
 		INJECTED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml
 	android:versionName
@@ -72,7 +72,7 @@ MERGED from [com.android.support:versionedparcelable:28.0.0] /Users/hzh/.gradle/
 		ADDED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:8:9-35
 	android:theme
 		ADDED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:12:9-59
-activity#com.hxk.playscreen.ui.MainActivity
+activity#android.hxk.playscreen.ui.MainActivity
 ADDED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:9-20:20
 	android:screenOrientation
 		ADDED from /Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:51-88

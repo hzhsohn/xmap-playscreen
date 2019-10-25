@@ -5,7 +5,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "com.hxk.playscreen"
+        applicationId "android.hxk.playscreen"
         minSdkVersion 14
         targetSdkVersion 28
         versionCode 1

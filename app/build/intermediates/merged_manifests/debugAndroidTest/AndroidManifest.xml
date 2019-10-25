@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hxk.playscreen.test">
+    package="android.hxk.playscreen.test">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="28" />
 
@@ -9,8 +9,8 @@
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="com.hxk.playscreen"
+                     android:targetPackage="android.hxk.playscreen"
                      android:handleProfiling="false"
                      android:functionalTest="false"
-                     android:label="Tests for com.hxk.playscreen"/>
+                     android:label="Tests for android.hxk.playscreen"/>
 </manifest>
