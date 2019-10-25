@@ -1,23 +1,23 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/hzh/Desktop/MqttClientAndroid-master/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
+            "outputFile": "/Users/hzh/Desktop/android-playscreen/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
             "map": [
                 {
-                    "source": "/Users/hzh/Desktop/MqttClientAndroid-master/app/src/main/res/values/colors.xml",
+                    "source": "/Users/hzh/Desktop/android-playscreen/app/src/main/res/values/strings.xml",
                     "from": {
-                        "startLines": "4,2,3",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "153,55,102",
-                        "endColumns": "45,46,50",
-                        "endOffsets": "194,97,148"
+                        "startLines": "1",
+                        "startColumns": "4",
+                        "startOffsets": "16",
+                        "endColumns": "54",
+                        "endOffsets": "66"
                     },
                     "to": {
-                        "startLines": "28,29,30",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "1940,1986,2033",
-                        "endColumns": "45,46,50",
-                        "endOffsets": "1981,2028,2079"
+                        "startLines": "252",
+                        "startColumns": "4",
+                        "startOffsets": "16769",
+                        "endColumns": "54",
+                        "endOffsets": "16819"
                     }
                 },
                 {
@@ -59,6 +59,23 @@
                     }
                 },
                 {
+                    "source": "/Users/hzh/Desktop/android-playscreen/app/src/main/res/values/colors.xml",
+                    "from": {
+                        "startLines": "4,2,3",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "153,55,102",
+                        "endColumns": "45,46,50",
+                        "endOffsets": "194,97,148"
+                    },
+                    "to": {
+                        "startLines": "28,29,30",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "1940,1986,2033",
+                        "endColumns": "45,46,50",
+                        "endOffsets": "1981,2028,2079"
+                    }
+                },
+                {
                     "source": "/Users/hzh/.gradle/caches/transforms-2/files-2.1/ccf94a4f227dfa4f17156620e28a8b98/support-compat-28.0.0/res/values/values.xml",
                     "from": {
                         "startLines": "2,3,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,171,172,176,177,178,6,13,56,88,125",
@@ -78,7 +95,7 @@
                     }
                 },
                 {
-                    "source": "/Users/hzh/Desktop/MqttClientAndroid-master/app/src/main/res/values/styles.xml",
+                    "source": "/Users/hzh/Desktop/android-playscreen/app/src/main/res/values/styles.xml",
                     "from": {
                         "startLines": "3",
                         "startColumns": "4",
@@ -94,23 +111,6 @@
                         "endLines": "265",
                         "endColumns": "12",
                         "endOffsets": "17704"
-                    }
-                },
-                {
-                    "source": "/Users/hzh/Desktop/MqttClientAndroid-master/app/src/main/res/values/strings.xml",
-                    "from": {
-                        "startLines": "1",
-                        "startColumns": "4",
-                        "startOffsets": "16",
-                        "endColumns": "54",
-                        "endOffsets": "66"
-                    },
-                    "to": {
-                        "startLines": "252",
-                        "startColumns": "4",
-                        "startOffsets": "16769",
-                        "endColumns": "54",
-                        "endOffsets": "16819"
                     }
                 }
             ]
