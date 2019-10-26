@@ -1,4 +1,4 @@
-#Sat Oct 26 13:45:07 CST 2019
+#Sat Oct 26 14:13:57 CST 2019
 base.0=/Users/hzh/Desktop/android-playscreen/app/build/intermediates/dex/debug/mergeDexDebug/out/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex

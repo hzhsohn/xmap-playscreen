@@ -197,7 +197,15 @@ public class MainActivity extends AppCompatActivity {
             MqttMessage message = (MqttMessage) ebc.content;
             Logger.d(message.toString());
             try {
-                String mqttJson = new String(message.getPayload(),"UTF-8");
+                //MSD/A全局广播格式为字符串分三段，每段用英文逗号分隔
+                String msd_a_msg=new String(message.getPayload(),"UTF-8");
+                String[] strArr = msd_a_msg.split(",");
+                if(3!=strArr.length)
+                {
+                    //判断是否为3段内容，否则返回
+                    return;
+                }
+                String mqttJson =strArr[2];
                 JSONObject person = new JSONObject(mqttJson);
                 String mqttCmd = person.getString("playscreen-cmd");
                 if(mqttCmd!=null && mqttCmd.equals("reload"))
