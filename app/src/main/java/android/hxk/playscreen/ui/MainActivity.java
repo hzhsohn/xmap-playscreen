@@ -49,8 +49,11 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String URL = "tcp://192.168.1.101:1883";
-    public static final String mCommandUrl="http://192.168.1.101/playscreen/command.php";
+    public static final String URL = "tcp://192.168.1.102:1883";
+    public static final String mCommandUrl0="http://192.168.1.101/playscreen/command.php";
+    public static final String mCommandUrl1="http://192.168.1.101/playscreen/command1.php";
+    public static final String mCommandUrl2="http://192.168.1.101/playscreen/command2.php";
+    public static String mCommandUrl=mCommandUrl0;
     private String userName = "";
     private String password = "";
     private String clientId = "";
@@ -60,7 +63,10 @@ public class MainActivity extends AppCompatActivity {
     WebView mWeb;
     ImageView mImg;
     int nPicDownloadPos; //下载图片的游标
+    int nShowPicPos;
     WebProc mLoadCommand;
+    //MSD设备的信息
+    String msdClientID;
     //
     ArrayList<String> v_list = new ArrayList<>();
     ArrayList<String> p_list = new ArrayList<>();
@@ -78,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
 
         //注册EventBus
         EventBus.getDefault().register(this);
+        //MSD设备
+        msdClientID=(int)(Math.random()*100000)+"";
         //主动连接MQTT
         timer.schedule(timerTask,1000,5000);//延时1s，每隔5000毫秒执行一次run方法
 
@@ -137,10 +145,16 @@ public class MainActivity extends AppCompatActivity {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            MqttManager.getInstance().subscribe("test", 2);
+                            //MSD搜索
+                            MqttManager.getInstance().subscribe("MSD/A", 2);
+                            //MSD设备控制
+                            MqttManager.getInstance().subscribe(msdClientID, 2);
                         }
                     }).start();
                 }
+
+
+                showPicList();
             }
             super.handleMessage(msg);
         }
@@ -152,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
             Message message = new Message();
             message.what = 1;
             handler.sendMessage(message);
+
         }
     };
 
@@ -197,25 +212,32 @@ public class MainActivity extends AppCompatActivity {
             MqttMessage message = (MqttMessage) ebc.content;
             Logger.d(message.toString());
             try {
-                //MSD/A全局广播格式为字符串分三段，每段用英文逗号分隔
-                String msd_a_msg=new String(message.getPayload(),"UTF-8");
-                String[] strArr = msd_a_msg.split(",");
-                if(3!=strArr.length)
+
+                //MSD/A设备分两段，全局广播格式为字符串分三段，每段用英文逗号分隔
+                //xmap过来的是纯json
+                String mqttdata = new String(message.getPayload(), "UTF-8");
+
+                //判断是否为XMAP过来的控制信息
+                if(mqttdata.charAt(0)=='{')
                 {
-                    //判断是否为3段内容，否则返回
-                    return;
+                    jsonCommandCtrl(mqttdata);
                 }
-                String mqttJson =strArr[2];
-                JSONObject person = new JSONObject(mqttJson);
-                String mqttCmd = person.getString("playscreen-cmd");
-                if(mqttCmd!=null && mqttCmd.equals("reload"))
-                {
-                    //重新加载显示数据
-                    webCommandInfo();
+                else {
+                    String[] strArr = mqttdata.split(",");
+                    if (2 != strArr.length && 3 != strArr.length) {
+                        //判断是否为2和3段内容，否则返回
+                        return;
+                    }
+                    if (strArr[0].equals("FMSD")) //MSD设备搜索服务
+                    {
+                        rebackMSD_B();
+                    } else //if(strArr[0].equals("playscreen"))
+                    {
+                        String msd_a_json = strArr[2];
+                        jsonCommandCtrl(msd_a_json);
+                    }
                 }
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
@@ -302,6 +324,73 @@ public class MainActivity extends AppCompatActivity {
     };
 
     //--------------------------------------------------------------
+    //MSD设备
+    // 创建JSONObject对象
+    private JSONObject createMSDJSONObject() {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("f", "playscreen");
+            result.put("n", "PlayScreen-"+msdClientID);
+            result.put("s", msdClientID);
+            result.put("p", msdClientID+"_");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    void rebackMSD_B()
+    {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String rdata="RMSD,"+msdClientID+","+createMSDJSONObject();
+                MqttManager.getInstance().publish("MSD/B", 2, rdata.getBytes());
+            }
+        }).start();
+    }
+
+    //--------------------------------------------------------------
+    //指令执行
+    void jsonCommandCtrl(String json)
+    {
+        JSONObject person = null;
+        try {
+            person = new JSONObject(json);
+
+            String mqttCmd = person.getString("playscreen-cmd");
+            if (mqttCmd != null && mqttCmd.equals("reload")) {
+                mCommandUrl=mCommandUrl0;
+                //重新加载显示数据
+                webCommandInfo();
+            }
+            else if (mqttCmd != null && mqttCmd.equals("mode1")) {
+                mCommandUrl=mCommandUrl1;
+                //重新加载显示数据
+                webCommandInfo();
+            }
+            else if (mqttCmd != null && mqttCmd.equals("mode2")) {
+                mCommandUrl=mCommandUrl2;
+                //重新加载显示数据
+                webCommandInfo();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    //--------------------------------------------------------------
+    //
+    void showPicList()
+    {
+        //如果图片层非隐藏状态就显示不同的图片
+        if(mImg.getVisibility()==View.VISIBLE) {
+            //显示图片
+            Bitmap bm = BitmapFactory.decodeFile(p_list_download_ok.get(nShowPicPos));
+            //将图片显示到ImageView中
+            mImg.setImageBitmap(bm);
+            nShowPicPos++;
+            nShowPicPos %= p_list_download_ok.size();
+        }
+    }
     //下载播放的图片
     void getPicListBegin()
     {
@@ -317,11 +406,9 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(p_list.size()==nPicDownloadPos)
         {
-            //下载完成,显示图片
-            Bitmap bm = BitmapFactory.decodeFile(p_list_download_ok.get(0));
-            //将图片显示到ImageView中
-            mImg.setImageBitmap(bm);
+            //下载完成,在定时器里显示图片
             //
+            nShowPicPos=0;
             mImg.setVisibility(View.VISIBLE);
         }
     }

@@ -28,26 +28,25 @@
 19-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:10:9-41
 20        android:supportsRtl="true"
 20-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:11:9-35
-21        android:testOnly="true"
-22        android:theme="@style/Theme.AppCompat.NoActionBar" >
-22-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:12:9-59
-23        <activity
-23-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:9-20:20
-24            android:name="android.hxk.playscreen.ui.MainActivity"
-24-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:19-50
-25            android:screenOrientation="landscape" >
-25-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:51-88
-26            <intent-filter>
-26-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:15:13-19:29
-27                <action android:name="android.intent.action.MAIN" />
-27-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:16:17-69
-27-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:16:25-66
-28
-29                <category android:name="android.intent.category.LAUNCHER" />
-29-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:18:17-76
-29-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:18:27-74
-30            </intent-filter>
-31        </activity>
-32    </application>
-33
-34</manifest>
+21        android:theme="@style/Theme.AppCompat.NoActionBar" >
+21-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:12:9-59
+22        <activity
+22-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:9-20:20
+23            android:name="android.hxk.playscreen.ui.MainActivity"
+23-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:19-50
+24            android:screenOrientation="landscape" >
+24-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:14:51-88
+25            <intent-filter>
+25-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:15:13-19:29
+26                <action android:name="android.intent.action.MAIN" />
+26-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:16:17-69
+26-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:16:25-66
+27
+28                <category android:name="android.intent.category.LAUNCHER" />
+28-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:18:17-76
+28-->/Users/hzh/Desktop/android-playscreen/app/src/main/AndroidManifest.xml:18:27-74
+29            </intent-filter>
+30        </activity>
+31    </application>
+32
+33</manifest>
