@@ -1,8 +1,18 @@
 package android.hxk.playscreen.ui;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.hxk.playscreen.magr.DownloadPic;
+import android.hxk.playscreen.magr.DownloadPicListener;
+import android.hxk.playscreen.magr.WebProc;
+import android.hxk.playscreen.magr.WebProcListener;
+import android.media.Image;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +23,11 @@ import android.hxk.playscreen.R;
 import android.hxk.playscreen.ebus.EBusContent;
 import android.hxk.playscreen.ebus.EBusType;
 import android.hxk.playscreen.mqtt.MqttManager;
+import android.webkit.WebView;
+import android.widget.ImageView;
+import android.widget.MediaController;
+import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.lichfaker.log.Logger;
 
@@ -20,7 +35,14 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,12 +50,23 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     public static final String URL = "tcp://192.168.1.101:1883";
+    public static final String mCommandUrl="http://192.168.1.101/playscreen/command.php";
     private String userName = "";
     private String password = "";
-    private String clientId = "clientId";
+    private String clientId = "";
     private boolean isFristConnected=false;
     Timer timer = new Timer();
+    VideoView mVideo;
+    WebView mWeb;
+    ImageView mImg;
+    int nPicDownloadPos; //下载图片的游标
+    WebProc mLoadCommand;
+    //
+    ArrayList<String> v_list = new ArrayList<>();
+    ArrayList<String> p_list = new ArrayList<>();
+    ArrayList<String> p_list_download_ok = new ArrayList<>();
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,48 +81,35 @@ public class MainActivity extends AppCompatActivity {
         //主动连接MQTT
         timer.schedule(timerTask,1000,5000);//延时1s，每隔5000毫秒执行一次run方法
 
-        findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MqttManager.getInstance().publish("test", 2, "hello".getBytes());
-                    }
-                }).start();
-            }
-        });
+        //界面初始化
+        mVideo=(VideoView)findViewById(R.id.videoView);
+        mWeb=(WebView) findViewById(R.id.webView);
+        mImg=(ImageView) findViewById(R.id.imageView);
+        mVideo.setVisibility(View.GONE);
+        mWeb.setVisibility(View.GONE);
 
-        findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MqttManager.getInstance().subscribe("test1", 2);
-                    }
-                }).start();
-            }
-        });
-
-        findViewById(R.id.button4).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            MqttManager.getInstance().disConnect();
-                        } catch (MqttException e) {
-
-                        }
-                    }
-                }).start();
-
-            }
-        });
+        //加载命令
+        mLoadCommand=new WebProc();
+        mLoadCommand.addListener(jsonCommand);
+        webCommandInfo();
     }
 
+    private void webCommandInfo()
+    {
+        mLoadCommand.getHtml(mCommandUrl,"");
+    }
+    private void webCommandInfoDelay()
+    {
+        //2秒后重新获取
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                webCommandInfo();
+            }
+        };
+        timer.schedule(task, 2000);//此处的Delay
+    }
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -135,6 +155,35 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    //初始化界面
+    void initFrmLayout()
+    {
+        mVideo.setVisibility(View.GONE);
+        mWeb.setVisibility(View.GONE);
+        mImg.setVisibility(View.GONE);
+    }
+
+    //播放本地视频
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void initLocalVideo(String filename) {
+        //设置有进度条可以拖动快进
+        MediaController localMediaController = new MediaController(this);
+        mVideo.setMediaController(localMediaController);
+        String uri = ("android.resource://" + getPackageName() + "/"+filename);
+        mVideo.setVideoURI(Uri.parse(uri));
+        mVideo.start();
+    }
+
+    //播放网络视频
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void initNetVideo(String url) {
+        //设置有进度条可以拖动快进
+        MediaController localMediaController = new MediaController(this);
+        mVideo.setMediaController(localMediaController);
+        mVideo.setVideoPath(url);
+        mVideo.start();
+    }
+
     /**
      * 订阅接收到的消息
      * 这里的Event类型可以根据需要自定义, 这里只做基础的演示
@@ -147,6 +196,20 @@ public class MainActivity extends AppCompatActivity {
             //输出test订阅信息的内容
             MqttMessage message = (MqttMessage) ebc.content;
             Logger.d(message.toString());
+            try {
+                String mqttJson = new String(message.getPayload(),"UTF-8");
+                JSONObject person = new JSONObject(mqttJson);
+                String mqttCmd = person.getString("playscreen-cmd");
+                if(mqttCmd!=null && mqttCmd.equals("reload"))
+                {
+                    //重新加载显示数据
+                    webCommandInfo();
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         else if (ebc.ebusType == EBusType.ebusMQTTDisconnect)
         {}
@@ -154,22 +217,124 @@ public class MainActivity extends AppCompatActivity {
         {}
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    public WebProcListener jsonCommand = new WebProcListener() {
+        @Override
+        public void cookies(String url, String cookie) {
 
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public void success_html(String url, String html) {
+
+            try {
+                JSONObject person = new JSONObject(html);
+                String cmd = person.getString("cmd");
+
+                //重设界面
+                initFrmLayout();
+
+                if(cmd.equals("video")) {
+
+                    JSONObject person2 = person.getJSONObject("info");
+                    //获取信息
+                    JSONArray ary = person2.getJSONArray("v_list");
+                    v_list.clear();
+                    for(int i=0;i<ary.length();i++) {
+                        v_list.add(ary.get(i).toString());
+                    }
+                    String videoUrl=ary.get(0).toString();
+                    //
+                    //initLocalVideo();
+                    initNetVideo(videoUrl);
+                    //
+                    mVideo.setVisibility(View.VISIBLE);
+
+                }
+                else if(cmd.equals("web")) {
+                    JSONObject person2 = person.getJSONObject("info");
+                    //获取信息
+                    String webUrl = person2.getString("w_url");
+                    mWeb.loadUrl(webUrl);
+                    //
+                    mWeb.setVisibility(View.VISIBLE);
+                }
+                else if(cmd.equals("pic")) {
+                    JSONObject person2 = person.getJSONObject("info");
+                    //获取信息
+                    JSONArray ary = person2.getJSONArray("p_list");
+                    p_list.clear();
+                    for(int i=0;i<ary.length();i++) {
+                        p_list.add(ary.get(i).toString());
+                    }
+                    //下载所有图片
+                    getPicListBegin();
+                    //
+                }
+                else{
+                    //重新获取
+                    webCommandInfoDelay();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                //
+                Toast.makeText(MainActivity.this, "错误：JSON数据解析异常", Toast.LENGTH_SHORT).show();
+                //重新获取
+                webCommandInfoDelay();
+            }
+
+        }
+
+        @Override
+        public void fail(String url, String errMsg) {
+            Toast.makeText(MainActivity.this, "错误：Web接口未能成功连接", Toast.LENGTH_SHORT).show();
+            //重新获取
+            webCommandInfoDelay();
+        }
+    };
+
+    //--------------------------------------------------------------
+    //下载播放的图片
+    void getPicListBegin()
+    {
+        nPicDownloadPos=0;
+        p_list_download_ok.clear();
+        getPicList();
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
+    void getPicList() {
+        if(nPicDownloadPos<p_list.size()) {
+            DownloadPic dp = new DownloadPic(this);
+            dp.addListener(dpl);
+            dp.download(p_list.get(nPicDownloadPos), "pic", nPicDownloadPos+".jpg");
+        }
+        else if(p_list.size()==nPicDownloadPos)
+        {
+            //下载完成,显示图片
+            Bitmap bm = BitmapFactory.decodeFile(p_list_download_ok.get(0));
+            //将图片显示到ImageView中
+            mImg.setImageBitmap(bm);
+            //
+            mImg.setVisibility(View.VISIBLE);
+        }
     }
+    DownloadPicListener dpl = new DownloadPicListener() {
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
+        @Override
+        public void success(String url, String album_filename) {
+            Toast.makeText(MainActivity.this, "图片下载成功"+url+"\n"+album_filename, Toast.LENGTH_SHORT).show();
+            p_list_download_ok.add(album_filename);
+            nPicDownloadPos++;
+            getPicList();
+        }
 
+        @Override
+        public void connect_fail(String url) {
+            getPicList();
+        }
 
+        @Override
+        public void save_pic_fail(String url) {
+            Toast.makeText(MainActivity.this, "错误：图片无法保存到本地", Toast.LENGTH_SHORT).show();
+        }
+    };
 }
