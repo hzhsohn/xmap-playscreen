@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     WebView mWeb;
     ImageView mImg;
     int nPicDownloadPos; //下载图片的游标
-    int nShowPicPos;
+    int nShowPicPos=-1;
     WebProc mLoadCommand;
     //MSD设备的信息
     String msdClientID;
@@ -381,19 +381,22 @@ public class MainActivity extends AppCompatActivity {
     //
     void showPicList()
     {
-        //如果图片层非隐藏状态就显示不同的图片
-        if(mImg.getVisibility()==View.VISIBLE) {
-            //显示图片
-            Bitmap bm = BitmapFactory.decodeFile(p_list_download_ok.get(nShowPicPos));
-            //将图片显示到ImageView中
-            mImg.setImageBitmap(bm);
-            nShowPicPos++;
-            nShowPicPos %= p_list_download_ok.size();
+        if(nShowPicPos!=-1) {
+            //如果图片层非隐藏状态就显示不同的图片
+            if (mImg.getVisibility() == View.VISIBLE) {
+                //显示图片
+                Bitmap bm = BitmapFactory.decodeFile(p_list_download_ok.get(nShowPicPos));
+                //将图片显示到ImageView中
+                mImg.setImageBitmap(bm);
+                nShowPicPos++;
+                nShowPicPos %= p_list_download_ok.size();
+            }
         }
     }
     //下载播放的图片
     void getPicListBegin()
     {
+        nShowPicPos=-1;
         nPicDownloadPos=0;
         p_list_download_ok.clear();
         getPicList();
